@@ -1,3 +1,16 @@
 **TaskBot**
 
-Raster mit Items, Prompt, Kamera, LLM.
+Human Robot Interaction
+LMU WS24/25
+
+**Group:**
+- Lukas Petz
+- Moritz Sölderer
+- Violetta Meier
+
+
+**Idea:**
+- Raster with Items
+- Prompt
+- Camera
+- LLM
