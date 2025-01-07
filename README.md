@@ -27,9 +27,9 @@ Tidying up objects after use. Recognizing whether a person is finished with a ta
 **Implementation:**
 - 3D print items --> add QR-Codes for position & recognition
 - Grid for items
-- Robot grasp items
-- LLM: queried to get task state (in progress/ done)
-- Query user for feedback: "Are you finished?" --> "Yes"/"No"
+- Robot grasps items
+- LLM: queried to get task state (in progress / done)
+- Query user for feedback: "Are you done with the task?" --> "Yes"/"No"
 - Robot act depending on state
 
 **Hardware needed**
