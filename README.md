@@ -23,6 +23,12 @@ Tidying up objects after use
 Recognizing whether a person is finished with a task (images or user feedback)
 E.g. used knife --> sink
 
+**Milestones**
+1. Recognize currently used items
+2. Grasp objects
+3. Recognize task state
+4. Interactively help user 
+
 **Implementation:**
 - 3D print items --> add QR-Codes for position & recognition
 - Grid for items
