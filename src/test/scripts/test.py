@@ -15,7 +15,9 @@ def test():
     print(angles)
 
     while True:
-        mc.send_angle(3, (angles[2] + 20 ) % 90, 20)
+        mc.send_angle(1, 0, 20)
+        mc.send_angle(2, 0, 20)
+        mc.send_angle(3, 0, 20)
         time.sleep(1)
         angles = mc.get_angles()
         print(angles)
