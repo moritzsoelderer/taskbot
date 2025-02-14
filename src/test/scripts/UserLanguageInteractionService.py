@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+
+import rospy
+from std_msgs.msg import String
 import speech_recognition as sr
 from typing import Optional
 import pyttsx3
@@ -15,7 +19,7 @@ class UserLanguageInteractionService:
                 self.speaker.setProperty('voice', voice.id)
                 break
     
-    def askUserBinary(self, question: str, true_answers: [str], false_answers: [str]):
+    def askUserBinary(self, question: str, true_answers: [str], false_answers: [str]) -> Optional[bool]:
         true_answers = list(map(str.lower, true_answers))
         false_answers = list(map(str.lower, false_answers))
 
@@ -31,6 +35,8 @@ class UserLanguageInteractionService:
                 return False
             else:
                 return None
+        return None
+
 
     def askUserJaNein(self, question: str) -> Optional[bool]:
         self.askUserBinary(question, ["ja"], ["nein"])
@@ -52,6 +58,24 @@ class UserLanguageInteractionService:
                 return None
 
 
+def askAndPublish(pub, question: String):
+    print("Question:", question.data)
+    print("Asking...")
+    service = UserLanguageInteractionService("de-DE")
+    ans = service.askUserJaNein(question.data)
+
+    answer = String()
+    answer.data = str(ans)
+
+    pub.publish(answer)
+    print("Done Asking")
+
+
 if __name__ == "__main__":
-    result = UserLanguageInteractionService("de-DE").askUserBinary("Soll ich das aufräumen?", ["Ja", "Warum nicht", "hallo"], ["Nein", "Später", "Gerade nicht"])
-    print("Result", result)
+    rospy.init_node(name="UserLanguageInteractionService")
+    pub = rospy.Publisher("user_answers", String, queue_size=1)
+
+    rospy.Subscriber("user_questions", String, lambda msg: askAndPublish(pub, msg), queue_size=1)
+    print("Done subscribing")
+    
+    rospy.spin()
