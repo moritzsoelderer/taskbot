@@ -27,7 +27,7 @@ def callback(data):
 
 try:
     baud = 115200
-    port = "/dev/ttyACM0"
+    port = "/dev/ttyACM1"
     print(port, baud)
 
     mc = MyCobot(port, baud)
