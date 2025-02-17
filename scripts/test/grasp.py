@@ -21,14 +21,15 @@ class GraspWithMoveIt:
         self.arm.allow_replanning(True)
         self.arm.set_goal_position_tolerance(0.01)
         self.arm.set_goal_orientation_tolerance(0.05)
+        #self.arm.set_planning_time(10)
 
     def open_gripper(self, mc):
         mc.set_gripper_state(0, 80)
-        time.sleep(2)
+        time.sleep(9)
 
     def close_gripper(self, mc):
         mc.set_gripper_state(1, 80)
-        time.sleep(2)
+        time.sleep(9)
 
     def reset_to_initial_position(self, mc):
         # Move to zero angles
@@ -60,27 +61,44 @@ class GraspWithMoveIt:
     def grasp(self, mc):
         self.reset_to_initial_position(mc)
 
+
+
+        # Define intermediate number 0 Cartesian position (--> where to pick up object)
+        intermediate0_position = PoseStamped()
+        intermediate0_position.header.frame_id = self.reference_frame
+        intermediate0_position.header.stamp = rospy.Time.now()
+        intermediate0_position.pose.position.x = -0.25
+        intermediate0_position.pose.position.y = 0.0
+        intermediate0_position.pose.position.z = 0.15
+        quat = quaternion_from_euler(-1.5708, -2.36, 0)
+        intermediate0_position.pose.orientation.x = quat[0]
+        intermediate0_position.pose.orientation.y = quat[1]
+        intermediate0_position.pose.orientation.z = quat[2]
+        intermediate0_position.pose.orientation.w = quat[3]
+
         # Define intermediate Cartesian position (--> where to pick up object)
         intermediate_position = PoseStamped()
         intermediate_position.header.frame_id = self.reference_frame
         intermediate_position.header.stamp = rospy.Time.now()
-        intermediate_position.pose.position.x = 0.2
-        intermediate_position.pose.position.y = -0.2
-        intermediate_position.pose.position.z = 0.2
-        quat = quaternion_from_euler(0, 0, 0)
+        intermediate_position.pose.position.x = -0.25
+        intermediate_position.pose.position.y = 0.0
+        intermediate_position.pose.position.z = 0.075
+        quat = quaternion_from_euler(-1.5708, -2.36, 0)
         intermediate_position.pose.orientation.x = quat[0]
         intermediate_position.pose.orientation.y = quat[1]
         intermediate_position.pose.orientation.z = quat[2]
         intermediate_position.pose.orientation.w = quat[3]
 
+
+
         # Define final Cartesian position (--> where to put object)
         final_position = PoseStamped()
         final_position.header.frame_id = self.reference_frame
         final_position.header.stamp = rospy.Time.now()
-        final_position.pose.position.x = 0.2
-        final_position.pose.position.y = 0.2
-        final_position.pose.position.z = 0.2
-        quat = quaternion_from_euler(0, 0, 0)
+        final_position.pose.position.x = 0.25
+        final_position.pose.position.y = 0.0
+        final_position.pose.position.z = 0.075
+        quat = quaternion_from_euler(-1.5708, -2.36, 0)
         final_position.pose.orientation.x = quat[0]
         final_position.pose.orientation.y = quat[1]
         final_position.pose.orientation.z = quat[2]
@@ -88,22 +106,23 @@ class GraspWithMoveIt:
 
 
         self.open_gripper(mc)
+        self.move_to_pose(intermediate0_position)
 
         # Move robot to intermediate position
         self.move_to_pose(intermediate_position)
 
         self.close_gripper(mc)
-        time.sleep(2)
+        time.sleep(4)
 
 
         self.move_to_pose(final_position)
         rospy.loginfo("Reached final position, opening gripper now.")
-        #self.open_gripper(mc)
+        self.open_gripper(mc)
 
 
 
     def run(self):
-        port = rospy.get_param("~port", "/dev/ttyACM1")
+        port = rospy.get_param("~port", "/dev/ttyACM0")
         baud = rospy.get_param("~baud", 115200)
         mc = MyCobot(port, baud)
         self.grasp(mc)
