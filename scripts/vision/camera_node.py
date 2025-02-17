@@ -26,26 +26,22 @@ class CameraPublisher:
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
         # Camera calibration parameters
-        self.K = np.array([
-            [503.52212697, 0.0, 319.5], # fx, 0, cx
-            [0.0, 501.75233068, 239.5], # 0, fy, cy
-            [0.0, 0.0, 1.0]
-        ])
+        # self.K = np.array([
+        #     [484.09, 0.0, 313.45], # fx, 0, cx
+        #     [0.0, 486.88, 244.77], # 0, fy, cy
+        #     [0.0, 0.0, 1.0]
+        # ])
 
         # Initialize CameraInfo message
         self.camera_info_msg = CameraInfo()
         self.camera_info_msg.height = 480
         self.camera_info_msg.width = 640
-        self.camera_info_msg.K = self.K.flatten().tolist()
-        self.camera_info_msg.D = [0.0, 0.0, 0.0, 0.0, 0.0]  # No distortion
+        self.camera_info_msg.K = [484.09392206416794, 0.0, 313.44707628106426, 0.0, 486.88216799355365, 244.7723326921671, 0.0, 0.0, 1.0]
+        self.camera_info_msg.D = [0.20556447733404937, -0.24417131503030026, 0.0008799080148198596, -0.0006182501743163579, 0.0]  # No distortion
         # Set identity matrix for rectification
         self.camera_info_msg.R = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
         # Set projection matrix (just K with an extra column for tx, ty, tz)
-        self.camera_info_msg.P = [
-            self.K[0,0], self.K[0,1], self.K[0,2], 0,
-            self.K[1,0], self.K[1,1], self.K[1,2], 0,
-            self.K[2,0], self.K[2,1], self.K[2,2], 0
-        ]
+        self.camera_info_msg.P = [504.35772705078125, 0.0, 312.560561603721, 0.0, 0.0, 507.0992431640625, 244.65665349823394, 0.0, 0.0, 0.0, 1.0, 0.0]
 
         # Check if camera opened successfully
         if not self.camera.isOpened():

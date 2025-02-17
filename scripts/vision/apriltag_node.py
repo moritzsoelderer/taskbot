@@ -8,13 +8,14 @@ from sensor_msgs.msg import Image, CameraInfo
 from taskbot.msg import AprilTagDetection, AprilTagDetectionArray
 from dt_apriltags import Detector
 
+
 class AprilTagDetectorNode:
     def __init__(self):
         rospy.init_node('apriltag_detector', anonymous=True)
 
         # Parameters
         self.tag_family = rospy.get_param('~tag_family', 'tag36h11')
-        self.tag_size = rospy.get_param('~tag_size', 0.162)  # meters
+        self.tag_size = rospy.get_param('~tag_size', 0.015)  # meters
 
         # Initialize detector
         self.detector = Detector(families=self.tag_family,
