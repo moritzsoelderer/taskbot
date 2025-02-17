@@ -45,10 +45,17 @@ class GraspWithMoveIt:
         self.arm.set_start_state_to_current_state()
         self.arm.set_planning_time(10.0)
         self.arm.set_pose_target(target_pose, self.end_effector_link)
-        plan_success, traj, planning_time, error_code = self.arm.plan()
-        if plan_success:
-            self.arm.execute(traj)
-        rospy.sleep(2)
+
+        plan = self.arm.plan()
+        if plan[0]:  # Plan success
+            rospy.loginfo("Executing planned motion...")
+            self.arm.execute(plan[1], wait=True)  # This will fully block
+            self.arm.stop()
+            self.arm.clear_pose_targets()
+            rospy.loginfo("Motion execution completed.")
+        else:
+            rospy.logwarn("Motion planning failed!")
+
 
     def grasp(self, mc):
         self.reset_to_initial_position(mc)
@@ -57,9 +64,9 @@ class GraspWithMoveIt:
         intermediate_position = PoseStamped()
         intermediate_position.header.frame_id = self.reference_frame
         intermediate_position.header.stamp = rospy.Time.now()
-        intermediate_position.pose.position.x = 0.1
-        intermediate_position.pose.position.y = 0.1
-        intermediate_position.pose.position.z = 0.1
+        intermediate_position.pose.position.x = 0.2
+        intermediate_position.pose.position.y = -0.2
+        intermediate_position.pose.position.z = 0.2
         quat = quaternion_from_euler(0, 0, 0)
         intermediate_position.pose.orientation.x = quat[0]
         intermediate_position.pose.orientation.y = quat[1]
@@ -70,9 +77,9 @@ class GraspWithMoveIt:
         final_position = PoseStamped()
         final_position.header.frame_id = self.reference_frame
         final_position.header.stamp = rospy.Time.now()
-        final_position.pose.position.x = 0.15
-        final_position.pose.position.y = 0.1
-        final_position.pose.position.z = 0.1
+        final_position.pose.position.x = 0.2
+        final_position.pose.position.y = 0.2
+        final_position.pose.position.z = 0.2
         quat = quaternion_from_euler(0, 0, 0)
         final_position.pose.orientation.x = quat[0]
         final_position.pose.orientation.y = quat[1]
@@ -88,8 +95,12 @@ class GraspWithMoveIt:
         self.close_gripper(mc)
         time.sleep(2)
 
+
         self.move_to_pose(final_position)
-        self.open_gripper(mc)
+        rospy.loginfo("Reached final position, opening gripper now.")
+        #self.open_gripper(mc)
+
+
 
     def run(self):
         port = rospy.get_param("~port", "/dev/ttyACM1")
