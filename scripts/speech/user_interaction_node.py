@@ -5,10 +5,13 @@ from std_msgs.msg import String
 from taskbot.msg import BoolOrNull
 from mapper import boolToBoolOrNull
 from user_interaction_service import UserLanguageInteractionService
+from dotenv import find_dotenv, dotenv_values
 
+
+env = dotenv_values(find_dotenv())  # take environment variables from .env.
 
 service = UserLanguageInteractionService("de-DE")
-pub = rospy.Publisher("user_answers", BoolOrNull, queue_size=1)
+pub = rospy.Publisher(env["USER_ANSWERS"], BoolOrNull, queue_size=1)
 
 
 def askAndPublish(pub, question: String):
@@ -26,7 +29,7 @@ def askAndPublish(pub, question: String):
 if __name__ == "__main__":
     rospy.init_node(name="user_interaction_node")
 
-    rospy.Subscriber("user_questions", String, lambda msg: askAndPublish(pub, msg), queue_size=1)
+    rospy.Subscriber(env["USER_QUESTIONS"], String, lambda msg: askAndPublish(pub, msg), queue_size=1)
     print("Done subscribing")
     
     rospy.spin()

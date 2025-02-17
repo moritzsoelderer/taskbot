@@ -49,3 +49,6 @@ Tidying up objects after use. Recognizing whether a person is finished with a ta
 - Make script executable: `sudo chmod +x your_script.py`
 - If necessary allow permission for usb-port: `sudo chmod 666 /dev/ttyACM0`
 - Run script: `rosrun your_package your_script.py`
+
+**HOW TO: Install required packages**
+run `pip install -r requirements.txt`
