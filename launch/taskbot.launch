@@ -1,0 +1,4 @@
+<launch>
+  <node name="sync" pkg="taskbot" type="sync.py" output="screen"/>
+  <node name="grasp_ms" pkg="taskbot" type="grasp_ms_node.py" output="screen"/>
+</launch>
