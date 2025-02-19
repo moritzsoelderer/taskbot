@@ -1,4 +1,6 @@
 <launch>
-  <node name="sync" pkg="taskbot" type="sync.py" output="screen"/>
-  <node name="grasp_ms" pkg="taskbot" type="grasp_ms_node.py" output="screen"/>
+  <node name="llm" pkg="taskbot" type="llm_node.py" output="screen"/>
+  <node name="camera" pkg="taskbot" type="camera_node.py" output="screen"/>
+  <node name="user_interaction" pkg="taskbot" type="user_interaction_node.py" output="screen"/>
+  <node name="logic" pkg="taskbot" type="scenario_logic.py" output="screen"/>
 </launch>

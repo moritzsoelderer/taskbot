@@ -8,7 +8,7 @@ from llm_service import LLMService
 
 env = dotenv_values(find_dotenv())
 
-response_pub = rospy.Publisher(env["LLM_RESPONSES"], String)
+response_pub = rospy.Publisher(env["LLM_RESPONSES"], String, queue_size=1)
 
 def image_callback(msg, service):
     print("Image Message received")
@@ -17,16 +17,16 @@ def image_callback(msg, service):
     answer = service.query(prompt=msg.data, image_msg=img)
 
     response = String()
-    response.data = answer
+    response.data = answer.choices[0].message.content
 
     response_pub.publish(response)
 
-    print(response)
-
 
 if __name__ == "__main__":
+    print("Hallo LLM node!!!")
     rospy.init_node("llm_node")
     llm_service = LLMService(env["OPENAI_APIKEY"])
+    print(env["LLM_PROMPTS"])
 
-    rospy.Subscriber(env["LLM_PROMPTS"], String, callback=lambda msg: image_callback(msg, llm_service))
+    rospy.Subscriber(env["LLM_PROMPTS"], String, lambda msg : image_callback(msg, llm_service), queue_size=1)
     rospy.spin()

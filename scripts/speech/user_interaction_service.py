@@ -1,3 +1,4 @@
+import rospy
 import speech_recognition as sr
 from typing import Optional
 import pyttsx3
@@ -26,10 +27,14 @@ class UserLanguageInteractionService:
         answer = self.listen()
         if answer is not None:
             answer = answer.lower().strip()
-            if answer in true_answers:
-                return True
-            elif answer in false_answers:
-                return False
+            for true_answer in true_answers:
+                print(answer, ": ", true_answer)
+                if true_answer in answer:
+                    return True
+            for false_answer in false_answers:
+                print(answer, ": ", false_answer)
+                if false_answer in answer:
+                    return False
             else:
                 return None
         return None
@@ -41,15 +46,16 @@ class UserLanguageInteractionService:
 
     def listen(self) -> Optional[str]:
         with sr.Microphone() as source:
-            print("Recording...")
-            audio = self.recognizer.listen(source)
+            rospy.loginfo("Recording...")
+            print(self.language)
+            audio = self.recognizer.listen(source, timeout=5)
             try:
                 text = self.recognizer.recognize_google(audio, language=self.language)
-                print("You said:", text)
+                rospy.loginfo(f"You said: {text}")
                 return text
             except sr.UnknownValueError:
-                print("Sorry, could not understand the audio.")
+                rospy.loginfo("Sorry, could not understand the audio.")
                 return None
             except sr.RequestError as e:
-                print(f"Could not request results from Google Speech Recognition service; {e}")
+                rospy.loginfo(f"Could not request results from Google Speech Recognition service; {e}")
                 return None
