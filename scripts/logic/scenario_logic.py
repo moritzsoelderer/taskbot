@@ -2,7 +2,6 @@ import time
 import rospy
 from moveit_commander import MoveGroupCommander
 from grasp import GraspWithMoveIt
-from llm.llm_service import LLMService
 from dotenv import find_dotenv, dotenv_values
 
 from std_msgs.msg import String
@@ -17,7 +16,7 @@ class ScenarioLogic:
         self.arm = MoveGroupCommander("arm_group")
         self.grasp = GraspWithMoveIt()
         self.question_pub = rospy.Publisher(env["USER_QUESTIONS", String])
-        self.prompt_pub = rospy.Publisher("llm_prompt", String)
+        self.prompt_pub = rospy.Publisher(env["LLM_PROMPTS"], String)
 
         self.last_query_time = None  # Timestamp for last user query
         self.last_usage_time = None  # Timestamp for last detected knife usage
@@ -27,10 +26,10 @@ class ScenarioLogic:
 
     def is_in_usage(self):
         prompt = String()
-        prompt.data = self.env["PROMPT"]
+        prompt.data = self.env["LLM_PROMPT"]
 
         self.prompt_pub.publish(prompt)
-        msg = rospy.wait_for_message("llm_response", String, timeout=10)
+        msg = rospy.wait_for_message(self.env["LLM_RESPONSES"], String, timeout=10)
 
         response = msg.data.lower()
         in_use = True if response.contains("yes") else False

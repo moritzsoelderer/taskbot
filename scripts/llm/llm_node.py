@@ -6,7 +6,9 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from llm_service import LLMService
 
-response_pub = rospy.Publisher('llm_response', String)
+env = dotenv_values(find_dotenv())
+
+response_pub = rospy.Publisher(env["LLM_RESPONSES"], String)
 
 def image_callback(msg, service):
     print("Image Message received")
@@ -24,9 +26,7 @@ def image_callback(msg, service):
 
 if __name__ == "__main__":
     rospy.init_node("llm_node")
-
-    env = dotenv_values(find_dotenv())
     llm_service = LLMService(env["OPENAI_APIKEY"])
 
-    rospy.Subscriber('llm_prompt', String, callback=lambda msg: image_callback(msg, llm_service))
+    rospy.Subscriber(env["LLM_PROMPTS"], String, callback=lambda msg: image_callback(msg, llm_service))
     rospy.spin()
