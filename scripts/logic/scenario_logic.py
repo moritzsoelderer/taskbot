@@ -1,37 +1,45 @@
 import time
 import rospy
 from moveit_commander import MoveGroupCommander
+from grasp import GraspWithMoveIt
+from llm.llm_service import LLMService
+from dotenv import find_dotenv, dotenv_values
+
 from std_msgs.msg import String
 from taskbot.msg import BoolOrNull
-from dotenv import find_dotenv, dotenv_values
-from grasp import GraspWithMoveIt
+
 
 class ScenarioLogic:
+
     def __init__(self):
-        rospy.init_node("scenario_logic")
-        self.arm = MoveGroupCommander("arm_group")
-        self.backoff = 2  # Initial backoff time
-        self.backoff_increment = 5
-        self.answer = "needed again"
         self.env = dotenv_values(find_dotenv())
 
-        self.pub = rospy.Publisher(self.env["USER_QUESTIONS"], String, queue_size=1)
-        rospy.Subscriber(self.env["USER_ANSWERS"], BoolOrNull, self.user_response_callback, queue_size=1)
+        self.arm = MoveGroupCommander("arm_group")
+        self.grasp = GraspWithMoveIt()
+        self.question_pub = rospy.Publisher(env["USER_QUESTIONS", String])
+        self.prompt_pub = rospy.Publisher("llm_prompt", String)
 
-        self.user_response = None
         self.last_query_time = None  # Timestamp for last user query
         self.last_usage_time = None  # Timestamp for last detected knife usage
-        self.grasp = GraspWithMoveIt()
+        self.backoff = 2  # Initial backoff time
+        self.backoff_increment = 5
+
 
     def is_in_usage(self):
-        #LLM to detect if the knife is in use
-        # replace comment later
-        in_use = False  # Assume not in use for now
+        prompt = String()
+        prompt.data = self.env["PROMPT"]
+
+        self.prompt_pub.publish(prompt)
+        msg = rospy.wait_for_message("llm_response", String, timeout=10)
+
+        response = msg.data.lower()
+        in_use = True if response.contains("yes") else False
 
         if in_use:
             self.last_usage_time = time.time()  # Update last usage timestamp
         
         return in_use
+
 
     def user_query(self):
         #Ask user if the knife is needed again
@@ -40,62 +48,54 @@ class ScenarioLogic:
         # First query: Ask instantly
         if self.last_query_time is None:
             should_ask = True
-        else:
-            # Only ask if n second not in use
-            if self.last_usage_time:
-                time_since_last_use = current_time - self.last_usage_time
-                should_ask = time_since_last_use >= 7
-            else:
-                should_ask = False
-
-        if should_ask:
-            question = String()
-            question.data = "Do you still need this?"
-            self.pub.publish(question)
-            rospy.loginfo("Asked user: Do you still need this?")
-
-            self.last_query_time = current_time  # Update last query timestamp
-            self.user_response = None
-
-            timeout = time.time() + 10  # Timeout after 10 seconds
-            while self.user_response is None and time.time() < timeout:
-                time.sleep(1)
-
-            if self.user_response is None:
-                rospy.logwarn("No response from user, assuming 'needed again'.")
-                return "needed again"
-            elif self.user_response:
-                self.current_backoff += self.backoff_increment
-                rospy.loginfo(f"User still needs the knife. Increasing backoff to {self.current_backoff} seconds.")
-                return "needed again"
-            else:
-                return "not needed again"
+        # Only ask if n second not in use
+        elif self.last_usage_time:
+            time_since_last_use = current_time - self.last_usage_time
+            if time_since_last_use >= 7:
+                return self.ask_user()
         else:
             rospy.loginfo("Skipping user query due to recent knife usage.")
             return "needed again"
 
-    def user_response_callback(self, msg):
-        if msg.data == BoolOrNull.TRUE:
-            self.user_response = True
-        elif msg.data == BoolOrNull.FALSE:
-            self.user_response = False
-        else:
-            self.user_response = None
 
-    #Move object to target location
+    def ask_user(self):
+        question = String()
+        question.data = "Do you still need this?"
+
+        self.question_pub.publish(question)
+        msg = rospy.wait_for_message(self.env["USER_ANSWERS"], BoolOrNull, timeout=10)
+        response = msg.data
+
+        rospy.loginfo(f"Asked user: {question}")
+
+        self.last_query_time = current_time  # Update last query timestamp
+
+        if user_response is None:
+            rospy.logwarn("No response from user, assuming 'needed again'.")
+            return "needed again"
+        elif user_response:
+            self.current_backoff += self.backoff_increment
+            rospy.loginfo(f"User still needs the knife. Increasing backoff to {self.current_backoff} seconds.")
+            return "needed again"
+        else:
+            return "not needed again"
+
+
     def move_object(self, id_object, id_target):
         rospy.loginfo(f"Moving object {id_object} to target {id_target}.")
         self.grasp.run()
         rospy.loginfo("Move completed.")
 
+
     def run(self):
         rospy.loginfo("Starting scenario logic...")
+        utensil_state = "needed again"
 
         # Wait until the knife is in use
         while not self.is_in_usage():
             time.sleep(1)
 
-        while self.answer == "needed again":
+        while utensil_state == "needed again":
             # Wait while knife is in use
             while self.is_in_usage():
                 time.sleep(1)
@@ -104,11 +104,11 @@ class ScenarioLogic:
             start_time = time.time()
             while not self.is_in_usage():
                 if time.time() - start_time >= self.backoff:
-                    self.answer = self.user_query()
+                    utensil_state = self.user_query()
                     break
                 time.sleep(1)
 
-            if self.answer == "needed again":
+            if utensil_state == "needed again":
                 while self.is_in_usage():
                     time.sleep(1)
                 continue
@@ -121,6 +121,7 @@ class ScenarioLogic:
         rospy.loginfo("Scenario complete.")
 
 if __name__ == "__main__":
+    rospy.init_node("scenario_logic")
     logic = ScenarioLogic()
     logic.run()
     rospy.spin()

@@ -15,6 +15,7 @@ class UserLanguageInteractionService:
                 self.speaker.setProperty('voice', voice.id)
                 break
     
+    
     def askUserBinary(self, question: str, true_answers: [str], false_answers: [str]) -> Optional[bool]:
         true_answers = list(map(str.lower, true_answers))
         false_answers = list(map(str.lower, false_answers))
