@@ -34,7 +34,7 @@ class AprilTagDetectorNode:
         # Publishers and Subscribers
         self.tag_pub = rospy.Publisher('tag_detections',
                                      AprilTagDetectionArray,
-                                     queue_size=1)
+                                     queue_size=10)
 
         self.image_sub = rospy.Subscriber('camera/image_raw',
                                          Image,
