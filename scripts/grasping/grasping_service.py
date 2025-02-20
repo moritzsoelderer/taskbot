@@ -34,7 +34,7 @@ class RobotControl():
         self.distance_threshold = (2, 5)
         self.move_gripper_to_pose(target_pose, grasp=False)
 
-        rc.mc.send_angles([0,0,0,0,0,0], 10)
+        self.mc.send_angles([0,0,0,0,0,0], 10)
 
         return
 
