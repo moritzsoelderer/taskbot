@@ -103,7 +103,7 @@ class ScenarioLogic:
         move.object_id = object_id
         move.target_id = target_id
         self.move_pub.publish(move)
-        rospy.wait_for_message(self.env["ROBOT_MOVE_RESPONSES"], Bool, timeout=10)
+        rospy.wait_for_message(self.env["ROBOT_MOVE_RESPONSES"], Bool, timeout=120)
         rospy.loginfo("Move completed.")
 
 
@@ -138,7 +138,7 @@ class ScenarioLogic:
 
         # Clean up knife
         rospy.loginfo("Cleaning up knife...")
-        self.move_object(object_id=0, target_id=1)
+        self.move_object(object_id=1, target_id=0)
         rospy.loginfo("Scenario complete.")
 
 if __name__ == "__main__":
