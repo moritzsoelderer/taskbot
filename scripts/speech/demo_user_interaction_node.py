@@ -14,13 +14,13 @@ pub = rospy.Publisher(env["USER_QUESTIONS"], String, queue_size=1)
 if __name__ == "__main__":
     rospy.init_node(name="demo_user_interaction_node")
     rospy.Subscriber(env["USER_ANSWERS"], BoolOrNull, lambda k: print("Answer:", k.data), queue_size=1)
-    print("Done subscribing")
+    rospy.loginfo("Done subscribing")
 
-    print("Asking...")
+    rospy.loginfo("Asking...")
     question = String()
     question.data = "Do you still need this?"
     pub.publish(question)
-    print("Done Asking")
+    rospy.loginfo("Done Asking")
 
     time.sleep(5)
     rospy.spin()
