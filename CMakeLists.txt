@@ -55,6 +55,7 @@ add_message_files(
   AprilTagDetection.msg
   AprilTagDetectionArray.msg
   BoolOrNull.msg
+  Move.msg
 )
 
 ## Generate services in the 'srv' folder

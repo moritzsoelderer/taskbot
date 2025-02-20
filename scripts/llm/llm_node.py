@@ -11,7 +11,7 @@ env = dotenv_values(find_dotenv())
 response_pub = rospy.Publisher(env["LLM_RESPONSES"], String, queue_size=1)
 
 def image_callback(msg, service):
-    print("Image Message received")
+    rospy.loginfo("Image Message received")
 
     img = rospy.wait_for_message('/camera/image_raw', Image, timeout=2)
     answer = service.query(prompt=msg.data, image_msg=img)

@@ -3,25 +3,24 @@
 import time
 import rospy
 from moveit_commander import MoveGroupCommander
-#from test.grasp import GraspWithMoveIt
 from dotenv import find_dotenv, dotenv_values
 
-from std_msgs.msg import String
-from taskbot.msg import BoolOrNull
+from std_msgs.msg import String, Bool
+from taskbot.msg import BoolOrNull, Move
 
 env = dotenv_values(find_dotenv())
 question_pub = rospy.Publisher(env["USER_QUESTIONS"], String, queue_size=1)
 prompt_pub = rospy.Publisher(env["LLM_PROMPTS"], String, queue_size=1)
+move_pub = rospy.Publisher(env["ROBOT_MOVES"], Move, queue_size=1)
 
 class ScenarioLogic:
 
     def __init__(self):
         self.env = env
 
-        self.arm = MoveGroupCommander("arm_group")
-        #self.grasp = GraspWithMoveIt()
         self.question_pub = question_pub
         self.prompt_pub = prompt_pub
+        self.move_pub = move_pub
 
         self.last_query_time = None  # Timestamp for last user query
         self.last_usage_time = None  # Timestamp for last detected knife usage
@@ -69,7 +68,7 @@ class ScenarioLogic:
         question.data = "Do you still need this?"
 
         self.question_pub.publish(question)
-        msg = rospy.wait_for_message(self.env["USER_ANSWERS"], BoolOrNull, timeout=20)
+        msg = rospy.wait_for_message(self.env["USER_ANSWERS"], BoolOrNull, timeout=25)
         rospy.logwarn(f"User Message: {msg}")
         user_response = self.boolOrNullToBool(msg.data)
 
@@ -98,9 +97,13 @@ class ScenarioLogic:
             return None
 
 
-    def move_object(self, id_object, id_target):
-        rospy.loginfo(f"Moving object {id_object} to target {id_target}.")
-        #self.grasp.run()
+    def move_object(self, object_id, target_id):
+        rospy.loginfo(f"Moving object {object_id} to target {target_id}.")
+        move = Move()
+        move.object_id = object_id
+        move.target_id = target_id
+        self.move_pub.publish(move)
+        rospy.wait_for_message(self.env["ROBOT_MOVE_RESPONSES"], Bool, timeout=10)
         rospy.loginfo("Move completed.")
 
 
@@ -135,7 +138,7 @@ class ScenarioLogic:
 
         # Clean up knife
         rospy.loginfo("Cleaning up knife...")
-        self.move_object(id_object=1, id_target=2)  # Correct apriltag IDs?
+        self.move_object(object_id=0, target_id=1)
         rospy.loginfo("Scenario complete.")
 
 if __name__ == "__main__":

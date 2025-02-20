@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     print("Asking...")
     question = String()
-    question.data = "Hallo!"
+    question.data = "Do you still need this?"
     pub.publish(question)
     print("Done Asking")
 
