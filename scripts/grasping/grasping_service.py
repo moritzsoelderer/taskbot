@@ -6,6 +6,7 @@ import numpy as np
 from time import sleep
 from tf.transformations import euler_from_matrix
 import math
+import pygame
 
 
 class RobotControl():
@@ -16,17 +17,33 @@ class RobotControl():
         rospy.Rate(10)
         
         self.distance_threshold = (1.5, 5)
-        self.TARGET_SIZE = 100 # 100 relates to ~ 2s
+        self.TARGET_SIZE = 50 # 100 relates to ~ 2s
         self.DIFF_CAMERA_TO_ORIGIN_X = -(275+75)
         self.DIFF_CAMERA_TO_ORIGIN_Y = -1
         self.MOVEMENT_THRESHOLD_T = 5
         self.MOVEMENT_THRESHOLD_R = 5
+        self.short_beep_audio_loc = rospy.get_param("short_beep_audio")
+
+        pygame.mixer.init()
 
         assert self.mc.get_coords() is not None
+
+
+    def play_short_beep_sound(self):
+        pygame.mixer.music.load(self.short_beep_audio_loc)
+        pygame.mixer.music.play()
+
+        while pygame.mixer.music.get_busy():
+            continue
+
 
     def move_object(self, id_object, id_target):
         object_pose = self.find_pose(id_object)
         target_pose = self.find_pose(id_target)
+
+        # Change Color & Beep
+        self.mc.set_color(71, 216, 206)
+        self.play_short_beep_sound()
 
         self.mc.set_gripper_state(0, self.speed)
         sleep(2)
@@ -35,6 +52,11 @@ class RobotControl():
         self.move_gripper_to_pose(target_pose, grasp=False)
 
         self.mc.send_angles([0,0,0,0,0,0], 10)
+        sleep(7)
+
+        # Change Color & Beep
+        self.mc.set_color(73, 226, 73)
+        self.play_short_beep_sound()
 
         return
 
@@ -90,7 +112,7 @@ class RobotControl():
                 rospy.loginfo(f"Try moving to coords: {current_target_with_xy_adaption}")
                 self.mc.send_coords(current_target_with_xy_adaption, self.speed, 0)
                 # sleep n sec
-                sleep(7)
+                sleep(6)
                 rospy.loginfo(f"Position after move: {self.mc.get_coords()}")
                 d1_t, d1_r = self.get_distance(current_target)
                 print(d0_t, d1_t, d0_r, d1_r)

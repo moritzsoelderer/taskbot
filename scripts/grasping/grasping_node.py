@@ -11,6 +11,7 @@ env = dotenv_values(find_dotenv())
 pub = rospy.Publisher(env["ROBOT_MOVE_RESPONSES"], Bool, queue_size=1)
 
 def move_robot(move: Move, robot_control: RobotControl) -> None:
+    rospy.loginfo("Received move command")
     robot_control.mc.send_angles([0,0,0,0,0,0], 10)
 
     robot_control.move_object(move.object_id, move.target_id)

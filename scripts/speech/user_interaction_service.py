@@ -17,7 +17,7 @@ class UserLanguageInteractionService:
     
     
     def askUserBinary(self, question: str, true_answers: [str], false_answers: [str], retries: int = 0, 
-                        fallback_question="Sorry I could not understand") -> Optional[bool]:
+                        fallback_question="Sorry I could not understand", response_true="", response_false="") -> Optional[bool]:
         true_answers = list(map(str.lower, true_answers))
         false_answers = list(map(str.lower, false_answers))
 
@@ -32,6 +32,14 @@ class UserLanguageInteractionService:
             answer = self.listen()
             response = self.detect(answer, true_answers, false_answers)
             r += 1
+
+        if response is not None:
+            if response:
+                if response_true != "":
+                    self.speak(response_true)
+            else:
+                if response_false != "":
+                    self.speak(response_false)
 
         return response
 
@@ -83,7 +91,7 @@ class UserLanguageInteractionService:
             rospy.loginfo(f"Source :{source}")
             rospy.loginfo("Recording...")
             self.play(self.loc_to_beep_sound)
-            audio = self.recognizer.listen(source, timeout=2)
+            audio = self.recognizer.listen(source, timeout=5, phrase_time_limit=5)
             rospy.loginfo("Voice Recorded.")
             try:
                 text = self.recognizer.recognize_google(audio, language=self.language)

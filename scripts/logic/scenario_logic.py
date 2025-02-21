@@ -57,8 +57,8 @@ class ScenarioLogic:
         # Only ask if n second not in use
         elif self.last_usage_time:
             time_since_last_use = current_time - self.last_usage_time
-            if time_since_last_use >= 7:
-                return self.ask_user(current_time)
+            #if time_since_last_use >= 7:
+            return self.ask_user(current_time)
         else:
             rospy.loginfo("Skipping user query due to recent knife usage.")
             return "needed again"
@@ -66,7 +66,7 @@ class ScenarioLogic:
 
     def ask_user(self, current_time):
         question = String()
-        question.data = "Do you still need this?"
+        question.data = "Do you still need the knife?"
 
         self.question_pub.publish(question)
         msg = rospy.wait_for_message(self.env["USER_ANSWERS"], BoolOrNull, timeout=25)

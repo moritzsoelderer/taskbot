@@ -14,7 +14,10 @@ pub = rospy.Publisher(env["USER_ANSWERS"], BoolOrNull, queue_size=1)
 
 
 def askAndPublish(pub, question: String):
-    ans = service.askUserBinary(question.data, ["yes", "yeah", "I think so"], ["no", "nah", "do not"], retries=1)
+    ans = service.askUserBinary(
+        question.data, ["yes", "yeah", "I think so"], ["no", "nah", "do not"],
+        retries=1, response_false="Ok. I'll take care of it."
+    )
 
     answer = BoolOrNull()
     answer.data = boolToBoolOrNull(ans)
