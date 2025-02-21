@@ -2,6 +2,7 @@
 
 import time
 import rospy
+import pygame
 from moveit_commander import MoveGroupCommander
 from dotenv import find_dotenv, dotenv_values
 
@@ -107,6 +108,15 @@ class ScenarioLogic:
         rospy.loginfo("Move completed.")
 
 
+    def play_startup_sound(self):
+        pygame.mixer.music.load(rospy.get_param("soft_startup_audio"))
+        pygame.mixer.music.play()
+
+        while pygame.mixer.music.get_busy():
+            continue
+        rospy.sleep(1)
+
+
     def run(self):
         rospy.loginfo("Starting scenario logic...")
         utensil_state = "needed again"
@@ -145,7 +155,10 @@ if __name__ == "__main__":
     rospy.init_node("scenario_logic_node")
     rospy.loginfo("scenario_logic_node started.")
     logic = ScenarioLogic()
+    pygame.mixer.init()
 
-    rospy.sleep(5) # let other nodes fully initialize first
+    rospy.sleep(4) # let other nodes fully initialize first
+    logic.play_startup_sound()
+
     logic.run()
     rospy.spin()

@@ -11,6 +11,7 @@ class UserLanguageInteractionService:
     def __init__(self, language: str = "en", speech_speed: int = 100) -> None:
         self.recognizer = sr.Recognizer()
         self.language = language
+        self.loc_to_beep_sound = rospy.get_param("beep_audio")
 
         pygame.mixer.init()
     
@@ -68,11 +69,21 @@ class UserLanguageInteractionService:
             continue
 
 
+    def play(self, loc_to_beep_sound: str) -> None:
+        pygame.mixer.music.load(loc_to_beep_sound)
+        pygame.mixer.music.play()
+
+        while pygame.mixer.music.get_busy():
+            continue
+        rospy.sleep(1)
+
+
     def listen(self) -> Optional[str]:
         with sr.Microphone() as source:
             rospy.loginfo(f"Source :{source}")
             rospy.loginfo("Recording...")
-            audio = self.recognizer.listen(source, timeout=3)
+            self.play(self.loc_to_beep_sound)
+            audio = self.recognizer.listen(source, timeout=2)
             rospy.loginfo("Voice Recorded.")
             try:
                 text = self.recognizer.recognize_google(audio, language=self.language)
