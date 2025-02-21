@@ -8,7 +8,8 @@ import numpy as np
 from pymycobot import MyCobot
 from sensor_msgs.msg import JointState
 from taskbot.msg import AprilTagDetectionArray
-from grasp_moveit_helper import create_pose_stamped, create_alt
+from grasp_moveit_helper import create_pose_stamped, create_alt, determine_pos_orient
+from tf.transformations import euler_from_matrix
 
 
 DOWNWARDS = np.array([
@@ -50,7 +51,7 @@ class GraspMoveItService:
 
         self.DIFF_CAMERA_TO_ORIGIN_X = -(0.275+0.075)
         self.DIFF_CAMERA_TO_ORIGIN_Y = -0.001
-        self.DIFF_VECTOR = np.array([-0.325, -0.001, 0.0])
+        self.DIFF_VECTOR = np.array([-0.355, -0.01, 0.60])
         self.TARGET_SIZE = 30 # 100 relates to ~ 2s
 
 
@@ -67,7 +68,7 @@ class GraspMoveItService:
         rospy.loginfo(f"Setting angles {self.mc.get_angles()} to zero...")
 
         for joint_id in range(1, 7):
-            #self.mc.send_angle(joint_id, 0, 40)
+            self.mc.send_angle(joint_id, 0, 40)
             time.sleep(1)
 
         rospy.loginfo(f"Set angles to {self.mc.get_angles()}.")
@@ -90,17 +91,22 @@ class GraspMoveItService:
         #object_orient = 
 
         # determine coordinates in cobot vector space
+        rospy.logwarn("BEFORE")
+        rospy.loginfo(f"Object Pos.: {object_pose} | Object Orient. (Euler): {object_orient}")
+        rospy.loginfo(f"Target Pos.: {target_pose} | Target Orient. (Euler): {target_orient}")
         object_pose, object_orient = determine_pos_orient(object_pose, object_orient, self.DIFF_VECTOR)
         target_pose, target_orient = determine_pos_orient(target_pose, target_orient, self.DIFF_VECTOR)
+        rospy.logwarn("AFTER")
         rospy.loginfo(f"Object Pos.: {object_pose} | Object Orient. (Euler): {object_orient}")
-        rospy.loginfo(f"Object Pos.: {target_pose} | Object Orient. (Euler): {target_orient}")
+        rospy.loginfo(f"Target Pos.: {target_pose} | Target Orient. (Euler): {target_orient}")
 
         self.open_gripper()
-        self.move_facing_downwards(object_pose, 0)
+        self.move_facing_downwards(object_pose + np.array([0, 0, 0.054]), np.abs(30-euler_from_matrix(object_orient)[2]), timeout=5)
         self.close_gripper()
         rospy.logwarn("DEBUG")
-        self.move_facing_downwards(target_pose, 0)
-        self.open_gripper
+        self.move_facing_downwards(target_pose + np.array([0, 0, 0.07]), np.abs(30-euler_from_matrix(object_orient)[2]), timeout=5)
+        self.open_gripper()
+        self.reset_to_initial_position()
 
 
     def move_facing_downwards(self, pos, z_orient, timeout=2):
@@ -141,7 +147,7 @@ class GraspMoveItService:
             raise
 
         avg_pose_t = np.mean(pose_ts, axis=0)
-        avg_pose_r = np.mean(pose_rs, axis=0)
+        avg_pose_r = np.mean(pose_rs, axis=0).reshape(3, 3)
         
         rospy.loginfo(f"Avg. Position: {avg_pose_t} | Avg. Orientation (Euler) {euler_from_matrix(avg_pose_r)}")
         return avg_pose_t, avg_pose_r

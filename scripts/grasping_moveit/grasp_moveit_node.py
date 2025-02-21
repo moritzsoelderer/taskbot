@@ -28,12 +28,16 @@ if __name__ == "__main__":
     rospy.init_node('robot_control', anonymous=True)
     rospy.loginfo("robot_control node started.")
 
-    # Init MoveIt, Scene & Cobot
+    # Init MoveIt & Scene
     moveit_commander.roscpp_initialize(sys.argv)
     arm = moveit_commander.MoveGroupCommander("arm_group")
     scene = moveit_commander.PlanningSceneInterface()
     add_plane(scene)
-    mc = init_mycobot()
+
+    # Init Cobot
+    baud = rospy.get_param("~baud", 115200)
+    port = rospy.get_param("~port", "/dev/ttyACM1")
+    mc = MyCobot(port, baud)
 
     # Init Service and Subscription
     robot_service = GraspMoveItService(scene, arm, mc)

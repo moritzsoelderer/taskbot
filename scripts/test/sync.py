@@ -7,7 +7,7 @@ import rospy
 import numpy as np
 
 i = 0
-speed = 100
+speed = 50
 last_data = None
 
 def callback(data):
@@ -22,15 +22,27 @@ def callback(data):
         last_data = data_list[:7]
 
     mc.send_angles(np.rad2deg(data_list[:6]).tolist(), speed)
-    gripper_value = int(abs(-0.7 - data_list[6]) * 117)
-    mc.set_gripper_value(gripper_value, speed)
+    #gripper_value = int(abs(-0.7 - data_list[6]) * 117)
+    #mc.set_gripper_value(gripper_value, speed)
 
 try:
-    baud = 115200
-    port = "/dev/ttyACM1"
-    print(port, baud)
-
+    baud = rospy.get_param("~baud", 115200)
+    mc = None
+    try:
+        port = rospy.get_param("~port", "/dev/ttyACM0")
+        mc = MyCobot(port, baud)
+    except Exception:
+        print("could not find ttyACM0")
+        try:
+            port = rospy.get_param("~port", "/dev/ttyACM1")
+            mc = MyCobot(port, baud)
+        except Exception:
+            print("could not find ttyACM1")
+    
+    port = rospy.get_param("~port", "/dev/ttyACM1")
     mc = MyCobot(port, baud)
+    
+    print(port, baud)
     running = True
     mc.set_fresh_mode(1)
 
