@@ -12,7 +12,7 @@ LMU WS24/25
 
 The idea behind TaskBot is to create an interactive kitchen assistance robot. This robot is designed to help in the kitchen by performing simple tasks, like grabbing utensils or tidying up. It is a helpful solution for making kitchen work more efficient and organized. 
 
-**Use case 1:**
+**Use case:**
 
 Tidying up objects after use. Recognizing whether a person is finished with a task (camera and user feedback). E.g. knife being used to cut vegetable --> knife no longer in use --> knife put in sink
 
