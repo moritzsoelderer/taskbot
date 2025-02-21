@@ -20,7 +20,8 @@ class UserLanguageInteractionService:
         true_answers = list(map(str.lower, true_answers))
         false_answers = list(map(str.lower, false_answers))
 
-        r = 0
+        r = 1
+        self.speak(question)
         response = None
         answer = self.listen()
         response = self.detect(answer, true_answers, false_answers)
