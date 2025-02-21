@@ -12,26 +12,22 @@ LMU WS24/25
 
 The idea behind TaskBot is to create an interactive kitchen assistance robot. This robot is designed to help in the kitchen by performing simple tasks, like grabbing utensils or tidying up. It is a helpful solution for making kitchen work more efficient and organized. 
 
-**Use case 1:**
+**Use case:**
 
 Tidying up objects after use. Recognizing whether a person is finished with a task (camera and user feedback). E.g. knife being used to cut vegetable --> knife no longer in use --> knife put in sink
 
-**Use case 2 (optional) :**
-
-Gives person matching items to the one just used. E.g. cutting board --> knife
-
 **Milestones:**
 
-1. Recognize items
-2. Grasp objects
-3. Recognize task state
-4. Interactively help user 
+1. Recognize items (Camera calibration, AprilTags)
+2. Grasp objects (Movement of joints and grasping)
+3. Recognize task state (logic, LLM)
+4. Interactively help user
 
 **Implementation:**
 - 3D print items --> add Apriltags for position & recognition
 - Robot grasps items
-- LLM: queried to get task state (in progress / done)
-- Query user for feedback: "Are you done with the task?" --> "Yes"/"No"
+- LLM: queried to get task state (in progress/done)
+- Query user for feedback: "Do you still need this?" --> "Yes"/"No"
 - Robot act interactively depending on state
 
 **Hardware needed:**
@@ -40,11 +36,13 @@ Gives person matching items to the one just used. E.g. cutting board --> knife
 - Camera
 - Speaker
 - Microphone
+- Print: AprilTags, Calibration checker board
 
 **Components:**
 - Voice Control
 - Camera coords
 - Robot Control (joints, gripper)
+- LLM
 
 **Software Components:**
 - Sensors:
