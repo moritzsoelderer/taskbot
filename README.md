@@ -1,3 +1,7 @@
+**Overview**
+
+This repository contains the source code for *Taskbot*, a project developed in the *Human Robot Interaction* practical at LMU Munich by Lukas Petz, Moritz Sölderer and Violetta Meier.
+
 **TaskBot**
 
 Human Robot Interaction
